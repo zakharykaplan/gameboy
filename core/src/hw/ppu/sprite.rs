@@ -9,6 +9,11 @@ pub struct Sprite {
     // Byte 2 - Tile Index
     pub idx: u8,
     // Byte 3 - Attributes/Flags
+    // Layout: 0b[Z, Y, X, P, 0000]
+    // - P: palette
+    // - X: x-flip
+    // - Y: y-flip
+    // - Z: priority
     pub priority: bool,
     pub yflip: bool,
     pub xflip: bool,
