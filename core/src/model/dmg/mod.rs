@@ -137,6 +137,7 @@ impl Block for GameBoy {
         self.joypad.reset();
 
         // Reset PPU
+        self.ppu.set_bus(self.mmu.clone()); // link MMU to CPU
         self.ppu.reset();
 
         // Reset timer

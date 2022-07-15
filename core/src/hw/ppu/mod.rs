@@ -8,12 +8,14 @@ use remus::mem::Ram;
 use remus::reg::Register;
 use remus::{Block, Device, Machine};
 
+use self::dma::Dma;
 use self::exec::Mode;
 use self::pixel::{Color, Palette, Pixel};
 use super::pic::{Interrupt, Pic};
 use crate::dmg::SCREEN;
 
 mod blk;
+mod dma;
 mod exec;
 mod pixel;
 mod screen;
@@ -29,6 +31,7 @@ pub struct Ppu {
     dot: usize,
     winln: u8,
     mode: Mode,
+    bus: Rc<RefCell<Bus>>,
     pic: Rc<RefCell<Pic>>,
     // ┌────────┬──────────────────┬─────┬───────┐
     // │  SIZE  │       NAME       │ DEV │ ALIAS │
@@ -43,6 +46,11 @@ pub struct Ppu {
 }
 
 impl Ppu {
+    /// Set the ppu's bus.
+    pub fn set_bus(&mut self, bus: Rc<RefCell<Bus>>) {
+        self.bus = bus;
+    }
+
     /// Set the ppu's pic.
     pub fn set_pic(&mut self, pic: Rc<RefCell<Pic>>) {
         self.pic = pic;
@@ -94,6 +102,10 @@ impl Block for Ppu {
 
         // Reset registers
         self.ctl.borrow_mut().reset();
+
+        // Reset DMA
+        self.ctl.borrow().dma.borrow_mut().set_bus(self.bus.clone());
+        self.ctl.borrow().dma.borrow_mut().set_oam(self.oam.clone());
     }
 }
 
@@ -104,6 +116,13 @@ impl Machine for Ppu {
 
     fn cycle(&mut self) {
         self.mode = std::mem::take(&mut self.mode).exec(self);
+
+        // Cycle the DMA every machine cycle
+        let ctl = self.ctl.borrow();
+        let mut dma = ctl.dma.borrow_mut();
+        if dma.enabled() && self.dot % 4 == 0 {
+            dma.cycle();
+        }
     }
 }
 
@@ -134,7 +153,7 @@ pub struct Registers {
     scx:  Rc<RefCell<Register<u8>>>,
     ly:   Rc<RefCell<Register<u8>>>,
     lyc:  Rc<RefCell<Register<u8>>>,
-    dma:  Rc<RefCell<Register<u8>>>,
+    dma:  Rc<RefCell<Dma>>,
     bgp:  Rc<RefCell<Register<u8>>>,
     obp0: Rc<RefCell<Register<u8>>>,
     obp1: Rc<RefCell<Register<u8>>>,
