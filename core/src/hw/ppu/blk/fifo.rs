@@ -7,6 +7,10 @@ use super::pixel::{Palette, Pixel};
 pub struct Fifo(VecDeque<Pixel>);
 
 impl Fifo {
+    pub fn clear(&mut self) {
+        self.0.clear()
+    }
+
     pub fn try_append(&mut self, row: TileRow) -> Result<(), TileRow> {
         if self.0.is_empty() {
             self.0.append(&mut row.0.into());

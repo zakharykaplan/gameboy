@@ -3,7 +3,9 @@ use std::fmt::Display;
 use remus::Device;
 
 use super::draw::Draw;
+use super::hblank::HBlank;
 use super::sprite::Sprite;
+use super::vblank::VBlank;
 use super::{Lcdc, Mode, Ppu};
 
 #[derive(Debug, Default)]
@@ -72,5 +74,21 @@ impl Display for Scan {
         writeln!(f, "│ Sprite: {:>3} │", self.idx)?;
         writeln!(f, "│ Found: {:>4} │", self.objs.len())?;
         write!(f, "└─────────────┘")
+    }
+}
+
+impl From<HBlank> for Scan {
+    fn from(HBlank { .. }: HBlank) -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
+}
+
+impl From<VBlank> for Scan {
+    fn from(VBlank { .. }: VBlank) -> Self {
+        Self {
+            ..Default::default()
+        }
     }
 }

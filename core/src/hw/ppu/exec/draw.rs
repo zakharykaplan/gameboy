@@ -6,8 +6,8 @@ use super::{Mode, Ppu, Scan, SCREEN};
 
 #[derive(Debug, Default)]
 pub struct Draw {
-    pixels: Pipeline,
-    objs: Vec<Sprite>,
+    pub(crate) pixels: Pipeline,
+    pub(crate) objs: Vec<Sprite>,
 }
 
 impl Draw {
@@ -23,7 +23,7 @@ impl Draw {
 
         // If we have a pixel to draw, draw it
         let xpos = self.pixels.xpos() as usize;
-        if let Some(pixel) = self.pixels.shift() {
+        if let Some(pixel) = self.pixels.shift(ppu) {
             // Calculate pixel index on screen
             let ypos = **ppu.ctl.borrow().ly.borrow() as usize;
             let idx = (ypos * SCREEN.width) + xpos;
@@ -45,7 +45,11 @@ impl Draw {
         if xpos < SCREEN.width {
             Mode::Draw(self)
         } else {
-            Mode::HBlank(Default::default())
+            // Increment window internal line counter
+            if self.pixels.was_at_win() {
+                ppu.winln += 1;
+            }
+            Mode::HBlank(self.into())
         }
     }
 }
@@ -62,8 +66,7 @@ impl Display for Draw {
 }
 
 impl From<Scan> for Draw {
-    fn from(scan: Scan) -> Self {
-        let Scan { objs, .. } = scan;
+    fn from(Scan { objs, .. }: Scan) -> Self {
         Self {
             objs,
             ..Default::default()

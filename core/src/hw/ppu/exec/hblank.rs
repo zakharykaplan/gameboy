@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use super::draw::Draw;
 use super::{Interrupt, Mode, Ppu, SCREEN};
 
 #[derive(Debug, Default)]
@@ -24,8 +25,10 @@ impl HBlank {
 
             // Either begin next scanline, or enter VBlank
             if *ly < SCREEN.height as u8 {
-                Mode::Scan(Default::default())
+                Mode::Scan(self.into())
             } else {
+                // Reset internal window line counter
+                ppu.winln = 0;
                 Mode::VBlank(Default::default())
             }
         }
@@ -37,5 +40,11 @@ impl Display for HBlank {
         writeln!(f, "┌─────────────┐")?;
         writeln!(f, "│ {:^11} │", "HBlank")?;
         write!(f, "└─────────────┘")
+    }
+}
+
+impl From<Draw> for HBlank {
+    fn from(Draw { .. }: Draw) -> Self {
+        Self
     }
 }

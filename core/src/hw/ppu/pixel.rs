@@ -45,7 +45,7 @@ impl Pixel {
 }
 
 /// Pixel color values.
-#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub enum Color {
     /// Lightest
     #[default]

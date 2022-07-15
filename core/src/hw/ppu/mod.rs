@@ -27,6 +27,7 @@ pub use self::screen::Screen;
 pub struct Ppu {
     lcd: Screen,
     dot: usize,
+    winln: u8,
     mode: Mode,
     pic: Rc<RefCell<Pic>>,
     // ┌────────┬──────────────────┬─────┬───────┐
@@ -183,7 +184,6 @@ impl Device for Registers {
     }
 }
 
-#[allow(dead_code)]
 #[rustfmt::skip]
 #[derive(Copy, Clone, Debug)]
 enum Lcdc {

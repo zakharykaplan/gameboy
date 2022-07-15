@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use super::hblank::HBlank;
 use super::{Mode, Ppu};
 
 #[derive(Debug, Default)]
@@ -26,7 +27,7 @@ impl VBlank {
                 // Reset scanline
                 *ly = 0;
                 // Restart PPU
-                Mode::Scan(Default::default())
+                Mode::Scan(self.into())
             }
         }
     }
@@ -37,5 +38,11 @@ impl Display for VBlank {
         writeln!(f, "┌─────────────┐")?;
         writeln!(f, "│ {:^11} │", "VBlank")?;
         write!(f, "└─────────────┘")
+    }
+}
+
+impl From<HBlank> for VBlank {
+    fn from(HBlank { .. }: HBlank) -> Self {
+        Self
     }
 }
